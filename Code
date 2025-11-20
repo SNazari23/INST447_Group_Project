@@ -1,0 +1,35 @@
+library(tidyverse)
+
+# Load dataset
+raw_data <- read.csv("life expectancy.csv", header = TRUE)
+
+clean_data <- raw_data
+names(clean_data) <- make.names(names(clean_data), unique = TRUE)
+
+# Remove duplicates
+clean_data <- clean_data %>% distinct()
+
+# Convert empty strings to NA & trim whitespace
+clean_data <- clean_data %>%
+  mutate(across(where(is.character), ~na_if(., ""))) %>%
+  mutate(across(where(is.character), trimws))
+
+# Automatically convert numeric-looking columns to numeric
+clean_data <- clean_data %>%
+  mutate(across(where(function(x)
+    all(grepl("^[0-9.]+$", x[!is.na(x)]))), as.numeric))
+
+# Drop rows with missing life expectancy
+if ("Life.expectancy" %in% names(clean_data)) {
+  clean_data <- clean_data %>% drop_na(Life.expectancy)
+}
+
+# Filter year range 
+if ("Year" %in% names(clean_data)) {
+  clean_data <- clean_data %>% filter(Year >= 2000, Year <= 2019)
+}
+
+# Save cleaned dataset
+write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
+
+cat(" File saved: cleaned_life_expectancy.csv\n")

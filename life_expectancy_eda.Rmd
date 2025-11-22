@@ -85,11 +85,29 @@ write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
 cat("File saved: cleaned_life_expectancy.csv\n")
 ```
 
-## Descriptive Statistics
+
+## Exploring the Data
+
+Get the dimensions (rows and columns)
 ```{r}
-numeric_cols <- clean_data %>% select(where(is.numeric))
-summary(numeric_cols)
+dim(clean_data)
 ```
+
+View first few rows
+```{r}
+head(clean_data)
+```
+
+View column names
+```{r}
+colnames(clean_data)
+```
+
+View data structures and types
+```{r}
+str(clean_data)
+```
+
 
 ## Potential Relationships We Expect
 1. Higher GDP likely → higher life expectancy
@@ -97,6 +115,13 @@ summary(numeric_cols)
 3. Higher health expenditure → higher life expectancy
 4. Higher income group → higher life expectancy
 5. Higher undernourishment → lower life expectancy
+
+
+## Descriptive Statistics
+```{r}
+numeric_cols <- clean_data %>% select(where(is.numeric))
+summary(numeric_cols)
+```
 
 
 ## Exploratory Data Analysis

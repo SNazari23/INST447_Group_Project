@@ -6,6 +6,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 library(dplyr)
 ```
 
@@ -13,9 +14,9 @@ library(dplyr)
 
 This project explores the relationship between global life expectancy and socio-economic indicators from 2000 to 2019. Using World Bank data, I focus on understanding how a country's wealth, education, and health investments relate to population health outcomes.
 
-**Key Question:**
+**Research Question:**
 
-* How have life expectancy trends evolved globally over the last two decades, and which socio-economic factors are most strongly associated with these trends?
+How have life expectancy trends evolved globally over the last two decades, and which socio-economic factors are most strongly associated with these trends?
 
 
 ## Dataset
@@ -27,11 +28,10 @@ This project explores the relationship between global life expectancy and socio-
 | Variable              | Description                               |
 | --------------------- | ----------------------------------------- |
 | Year                  | Observation year (2000–2019)              |
-| Life.expectancy       | Average life expectancy in years          |
-| GDP                   | Gross Domestic Product per capita         |
-| Education.expenditure | % of GDP spent on education               |
-| Health.expenditure    | % of GDP spent on healthcare              |
-| Income.group          | Income classification (Low, Middle, High) |
+| Life Expectancy       | Average life expectancy in years          |
+| Health Expenditure    | % of GDP spent on healthcare              |
+| Education Expenditure | % of GDP spent on education               |
+| Income Group          | Income classification (Low, Middle, High) |
 | Undernourishment      | % of population lacking adequate food     |
 
 **Data Cleaning**
@@ -52,30 +52,30 @@ names(clean_data) <- make.names(names(clean_data), unique = TRUE)
 
 * Remove duplicates and empty strings
 ```{r}
-clean_data <- clean_data %>% distinct()
+clean_data <- clean_data |> distinct()
 
-clean_data <- clean_data %>%
-mutate(across(where(is.character), ~na_if(., ""))) %>%
+clean_data <- clean_data |>
+mutate(across(where(is.character), ~na_if(., ""))) |>
 mutate(across(where(is.character), trimws))
 ```
 
 * Convert numeric-looking strings to numeric
 ```{r}
-clean_data <- clean_data %>%
+clean_data <- clean_data |>
 mutate(across(where(function(x) all(grepl("^[0-9.]+$", x[!is.na(x)]))), as.numeric))
 ```
 
 * Filter years 2000–2019
 ```{r}
 if ("Year" %in% names(clean_data)) {
-clean_data <- clean_data %>% filter(Year >= 2000, Year <= 2019)
+clean_data <- clean_data |> filter(Year >= 2000, Year <= 2019)
 }
 ```
 
 * Drop rows with missing `Life.expectancy`
 ```{r}
 if ("Life.expectancy" %in% names(clean_data)) {
-clean_data <- clean_data %>% drop_na(Life.expectancy)
+clean_data <- clean_data |> drop_na(Life.expectancy)
 }
 ```
 
@@ -110,7 +110,7 @@ str(clean_data)
 
 
 ## Potential Relationships We Expect
-1. Higher GDP likely → higher life expectancy
+1. Higher health expenditure likely → higher life expectancy
 2. Higher education expenditure → higher life expectancy
 3. Higher health expenditure → higher life expectancy
 4. Higher income group → higher life expectancy
@@ -119,7 +119,7 @@ str(clean_data)
 
 ## Descriptive Statistics
 ```{r}
-numeric_cols <- clean_data %>% select(where(is.numeric))
+numeric_cols <- clean_data |> select(where(is.numeric))
 summary(numeric_cols)
 ```
 
@@ -129,21 +129,74 @@ summary(numeric_cols)
 ### 1. Global Life Expectancy Trends
 
 * **Visualization:** Line plot of average life expectancy over time.
+```{r}
+clean_data |>
+  group_by(Year) |>
+  summarize(mean_life = mean(Life.Expectancy.World.Bank, na.rm = TRUE)) |>
+  ggplot(aes(x = Year, y = mean_life)) +
+  geom_line(linewidth = 1.2, color = "palegreen3") +
+  labs(
+    title = "Global Average Life Expectancy (2000–2019)",
+    x = "Year",
+    y = "Average Life Expectancy"
+  ) +
+  theme_minimal()
+```
 * **Insight:** 
 
-### 2. Relationship Between GDP and Life Expectancy
+### 2. Relationship Between Health Expenditure and Life Expectancy
 
 * **Visualization:** Scatterplot with regression line.
+```{r}
+clean_data |>
+  ggplot(aes(x = Health.Expenditure.., y = Life.Expectancy.World.Bank)) +
+  geom_point(alpha = 0.4, color = "lightblue2") +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1.2, color = "lightblue3") +
+  labs(
+    title = "Health Expentiture vs. Life Expectancy",
+    x = "Health Expentiture (% of GDP)",
+    y = "Life Expectancy (Years)"
+  ) +
+  theme_minimal()
+
+```
 * **Insight:** 
 
 ### 3. Relationship Between Education Expenditure and Life Expectancy
 
 * **Visualization:** Scatterplot with regression line.
+```{r}
+clean_data |>
+  ggplot(aes(x = Education.Expenditure.., 
+             y = Life.Expectancy.World.Bank)) +
+  geom_point(alpha = 0.4, color = "cornflowerblue") +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1.2, color = "royalblue4") +
+  labs(
+    title = "Education Expenditure vs. Life Expectancy",
+    x = "Education Expenditure (% of GDP)",
+    y = "Life Expectancy (Years)"
+  ) +
+  theme_minimal()
+```
 * **Insight:** 
 
 ### 4. Life Expectancy by Income Group
 
 * **Visualization:** Boxplot grouped by income classification.
+```{r}
+clean_data |>
+  ggplot(aes(x = IncomeGroup, 
+             y = Life.Expectancy.World.Bank,
+             fill = IncomeGroup)) +
+  geom_boxplot(alpha = 0.8, palete = "") +
+  labs(
+    title = "Life Expectancy by Income Group",
+    x = "Income Group",
+    y = "Life Expectancy (Years)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
 * **Insight:** 
 
 
@@ -158,7 +211,7 @@ summary(numeric_cols)
 
 ## Conclusion
 
-This analysis highlights that life expectancy trends are strongly associated with GDP, education, and income group. While these indicators explain much of the variation, other unmeasured factors likely play a role. Policy makers can use these insights to prioritize investments in health and education to improve life expectancy outcomes globally.
+This analysis highlights that life expectancy trends are strongly associated with health, education, and income group. While these indicators explain much of the variation, other unmeasured factors likely play a role. Policy makers can use these insights to prioritize investments in health and education to improve life expectancy outcomes globally.
 
 
 

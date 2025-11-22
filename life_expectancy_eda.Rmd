@@ -1,11 +1,12 @@
 ---
-title: "How do Socio-Economic Factors Influence Global Life Expectancy?"
+title: "How Do Socio-Economic Factors Influence Global Life Expectancy?"
 author: "An Exploratory Data Analysis"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 ## Project Overview
@@ -19,7 +20,8 @@ This project explores the relationship between global life expectancy and socio-
 
 ## Dataset
 
-**Source:** Kaggle – "Life Expectancy & Socio-Economic Factors" (World Bank)
+**Source:** [Kaggle – "Life Expectancy & Socio-Economic Factors" (World Bank)](https://www.kaggle.com/datasets/mjshri23/life-expectancy-and-socio-economic-world-bank)
+
 **Features Selected for Analysis:**
 
 | Variable              | Description                               |
@@ -83,6 +85,18 @@ write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
 cat("File saved: cleaned_life_expectancy.csv\n")
 ```
 
+## Descriptive Statistics
+```{r}
+numeric_cols <- clean_data %>% select(where(is.numeric))
+summary(numeric_cols)
+```
+
+## Potential Relationships We Expect
+1. Higher GDP likely → higher life expectancy
+2. Higher education expenditure → higher life expectancy
+3. Higher health expenditure → higher life expectancy
+4. Higher income group → higher life expectancy
+5. Higher undernourishment → lower life expectancy
 
 
 ## Exploratory Data Analysis
@@ -106,17 +120,6 @@ cat("File saved: cleaned_life_expectancy.csv\n")
 
 * **Visualization:** Boxplot grouped by income classification.
 * **Insight:** 
-
-
-
-## Potential Relationships
-
-
-
-
-## Simplified Descriptive Statistics
-
-
 
 
 ## Data Limitations

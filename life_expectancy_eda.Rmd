@@ -112,9 +112,8 @@ str(clean_data)
 ## Potential Relationships We Expect
 1. Higher health expenditure likely → higher life expectancy
 2. Higher education expenditure → higher life expectancy
-3. Higher health expenditure → higher life expectancy
-4. Higher income group → higher life expectancy
-5. Higher undernourishment → lower life expectancy
+3. Higher income group → higher life expectancy
+4. Higher undernourishment → lower life expectancy
 
 
 ## Descriptive Statistics
@@ -125,6 +124,24 @@ summary(numeric_cols)
 
 
 ## Exploratory Data Analysis
+
+## Anova of Health expenditure & life expectancy 
+anova_health_life_expenditure <- aov(cleaned_life_expectancy$Health.Expenditure ~ cleaned_life_expectancy$Life.Expectancy.World.Bank, data = df)
+summary(anova_health_life_expenditure) 
+
+##Anova of education expenditure & life expectancy 
+anova_education_life_expenditure <- aov(cleaned_life_expectancy$Education.Expenditure ~ cleaned_life_expectancy$Life.Expectancy.World.Bank, data = df) 
+summary(anova_education_life_expenditure) 
+
+##Anova of income group expenditure & life expectancy 
+anova_income_life_expenditure <- aov(Life.Expectancy.World.Bank ~ IncomeGroup,data = cleaned_life_expectancy) 
+summary(anova_income_life_expenditure) 
+
+##Anova of undernourishment & life expectancy  
+anova_undernourishment_life_expenditure <- aov(Life.Expectancy.World.Bank ~ Prevelance.of.Undernourishment,data = cleaned_life_expectancy)  
+summary(anova_undernourishment_life_expenditure)
+
+
 
 ### 1. Global Life Expectancy Trends
 
@@ -216,3 +233,4 @@ This analysis highlights that life expectancy trends are strongly associated wit
 
 
 *GitHub Repository:* [https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23](https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23)
+

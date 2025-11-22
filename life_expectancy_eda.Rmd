@@ -1,0 +1,137 @@
+---
+title: "How do Socio-Economic Factors Influence Global Life Expectancy?"
+author: "An Exploratory Data Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Overview
+
+This project explores the relationship between global life expectancy and socio-economic indicators from 2000 to 2019. Using World Bank data, I focus on understanding how a country's wealth, education, and health investments relate to population health outcomes.
+
+**Key Question:**
+
+* How have life expectancy trends evolved globally over the last two decades, and which socio-economic factors are most strongly associated with these trends?
+
+
+## Dataset
+
+**Source:** Kaggle – "Life Expectancy & Socio-Economic Factors" (World Bank)
+**Features Selected for Analysis:**
+
+| Variable              | Description                               |
+| --------------------- | ----------------------------------------- |
+| Year                  | Observation year (2000–2019)              |
+| Life.expectancy       | Average life expectancy in years          |
+| GDP                   | Gross Domestic Product per capita         |
+| Education.expenditure | % of GDP spent on education               |
+| Health.expenditure    | % of GDP spent on healthcare              |
+| Income.group          | Income classification (Low, Middle, High) |
+| Undernourishment      | % of population lacking adequate food     |
+
+**Data Cleaning**
+
+* Load dataset
+```{r}
+# Load dataset
+raw_data <- read.csv("life expectancy.csv", header = TRUE)
+
+# Make a copy of the dataset for cleaning
+clean_data <- raw_data
+```
+
+* Standardize column names
+```{r}
+names(clean_data) <- make.names(names(clean_data), unique = TRUE)
+```
+
+* Remove duplicates and empty strings
+```{r}
+clean_data <- clean_data %>% distinct()
+
+clean_data <- clean_data %>%
+mutate(across(where(is.character), ~na_if(., ""))) %>%
+mutate(across(where(is.character), trimws))
+```
+
+* Convert numeric-looking strings to numeric
+```{r}
+clean_data <- clean_data %>%
+mutate(across(where(function(x) all(grepl("^[0-9.]+$", x[!is.na(x)]))), as.numeric))
+```
+
+* Filter years 2000–2019
+```{r}
+if ("Year" %in% names(clean_data)) {
+clean_data <- clean_data %>% filter(Year >= 2000, Year <= 2019)
+}
+```
+
+* Drop rows with missing `Life.expectancy`
+```{r}
+if ("Life.expectancy" %in% names(clean_data)) {
+clean_data <- clean_data %>% drop_na(Life.expectancy)
+}
+```
+
+* Save cleaned dataset as `cleaned_life_expectancy.csv`
+```{r}
+write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
+cat("File saved: cleaned_life_expectancy.csv\n")
+```
+
+
+
+## Exploratory Data Analysis
+
+### 1. Global Life Expectancy Trends
+
+* **Visualization:** Line plot of average life expectancy over time.
+* **Insight:** 
+
+### 2. Relationship Between GDP and Life Expectancy
+
+* **Visualization:** Scatterplot with regression line.
+* **Insight:** 
+
+### 3. Relationship Between Education Expenditure and Life Expectancy
+
+* **Visualization:** Scatterplot with regression line.
+* **Insight:** 
+
+### 4. Life Expectancy by Income Group
+
+* **Visualization:** Boxplot grouped by income classification.
+* **Insight:** 
+
+
+
+## Potential Relationships
+
+
+
+
+## Simplified Descriptive Statistics
+
+
+
+
+## Data Limitations
+
+* Dataset focuses on national-level data, not individual-level outcomes
+* Regional differences within countries are not captured
+* Some socio-economic indicators (ex. CO₂ emissions, corruption) were omitted to simplify analysis
+* Missing data and small variations in reporting may bias results
+
+
+
+## Conclusion
+
+This analysis highlights that life expectancy trends are strongly associated with GDP, education, and income group. While these indicators explain much of the variation, other unmeasured factors likely play a role. Policy makers can use these insights to prioritize investments in health and education to improve life expectancy outcomes globally.
+
+
+
+*GitHub Repository:* [https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23](https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23)

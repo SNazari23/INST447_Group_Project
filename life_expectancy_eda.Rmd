@@ -23,16 +23,27 @@ How have life expectancy trends evolved globally over the last two decades, and 
 
 **Source:** [Kaggle – "Life Expectancy & Socio-Economic Factors" (World Bank)](https://www.kaggle.com/datasets/mjshri23/life-expectancy-and-socio-economic-world-bank)
 
-**Features Selected for Analysis:**
+**All Relevant Variables:**
 
-| Variable              | Description                               |
-| --------------------- | ----------------------------------------- |
-| Year                  | Observation year (2000–2019)              |
-| Life Expectancy       | Average life expectancy in years          |
-| Health Expenditure    | % of GDP spent on healthcare              |
-| Education Expenditure | % of GDP spent on education               |
-| Income Group          | Income classification (Low, Middle, High) |
-| Undernourishment      | % of population lacking adequate food     |
+| Variable                           | Description                                                                                                                       |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Country.Name**                   | Name of the country.                                                                                                              |
+| **Country.Code**                   | country code.                                                                                                        |
+| **Region**                         | Geographical region classification.                                                                                               |
+| **IncomeGroup**                    | I ncome classification (Low, Lower Middle, Upper Middle, High).                                                         |
+| **Year**                           | Observation year (2000–2019).                                                                                                     |
+| **Life.Expectancy.World.Bank**     | Average life expectancy at birth, reported by the World Bank.                                                                     |
+| **Health.Expenditure..**           | Current health expenditure as a percentage of GDP. Represents spending on healthcare services and goods consumed within the year. |
+| **Education.Expenditure..**        | Total government expenditure on education as a percentage of GDP. Includes current and capital spending.                          |
+| **Prevelance.of.Undernourishment** | Percentage of the population not consuming enough calories for an active, healthy life.                                           |
+| **CO2**                            | CO2 emissions per capita (metric tons). A general indicator of industrialization and economic activity.                           |
+| **Unemployment**                   | Percentage of the total labor force that is unemployed but actively seeking work.                                                 |
+| **Corruption**                     | CPIA transparency and accountability rating, measuring public sector governance quality.                                          |
+| **Sanitation**                     | Percentage of the population using safely managed sanitation services.                                                            |
+| **Injuries**                       | Disability-Adjusted Life Years (DALYs) lost due to injuries. Higher values indicate worse injury-related health outcomes.         |
+| **Communicable**                   | DALYs from communicable diseases. Reflects the burden of infectious disease.                                 |
+| **NonCommunicable**                | DALYs from noncommunicable diseases. Higher values indicate greater chronic illness burden.         |
+
 
 **Data Cleaning**
 
@@ -109,43 +120,33 @@ str(clean_data)
 ```
 
 
-## Potential Relationships We Expect
-1. Higher health expenditure likely → higher life expectancy
-2. Higher education expenditure → higher life expectancy
-3. Higher income group → higher life expectancy
-4. Higher undernourishment → lower life expectancy
-
-
 ## Descriptive Statistics
 ```{r}
 numeric_cols <- clean_data |> select(where(is.numeric))
 summary(numeric_cols)
 ```
 
+## Variable Selection
 
-## Exploratory Data Analysis
+Although the dataset contains additional variables (CO2 emissions, unemployment rates, disease spread, corruption ratings), this analysis focuses on the variables most directly tied to life expectancy:
 
-## Anova of Health expenditure & life expectancy 
-anova_health_life_expenditure <- aov(cleaned_life_expectancy$Health.Expenditure ~ cleaned_life_expectancy$Life.Expectancy.World.Bank, data = df)
-summary(anova_health_life_expenditure) 
+1. health spending
+2. education spending
+3. income level
 
-##Anova of education expenditure & life expectancy 
-anova_education_life_expenditure <- aov(cleaned_life_expectancy$Education.Expenditure ~ cleaned_life_expectancy$Life.Expectancy.World.Bank, data = df) 
-summary(anova_education_life_expenditure) 
-
-##Anova of income group expenditure & life expectancy 
-anova_income_life_expenditure <- aov(Life.Expectancy.World.Bank ~ IncomeGroup,data = cleaned_life_expectancy) 
-summary(anova_income_life_expenditure) 
-
-##Anova of undernourishment & life expectancy  
-anova_undernourishment_life_expenditure <- aov(Life.Expectancy.World.Bank ~ Prevelance.of.Undernourishment,data = cleaned_life_expectancy)  
-summary(anova_undernourishment_life_expenditure)
+Other variables are listed as potentially related but not explored in depth due to the project scope.
 
 
+## Potential Relationships We Expect
+1. Life expectancy increases over time
+2. Higher health expenditure likely -> higher life expectancy
+3. Higher education expenditure -> higher life expectancy
+4. Higher income group -> higher life expectancy
 
-### 1. Global Life Expectancy Trends
 
-* **Visualization:** Line plot of average life expectancy over time.
+### 1. How Has Global Life Expectancy Evolved Over Time?
+
+* **Visualization:** Line plot of average life expectancy between 2000 and 2019.
 ```{r}
 clean_data |>
   group_by(Year) |>
@@ -159,9 +160,11 @@ clean_data |>
   ) +
   theme_minimal()
 ```
-* **Insight:** 
 
-### 2. Relationship Between Health Expenditure and Life Expectancy
+* **Insight:** Average global life expectancy shows a steady incline from 2000 to 2019. Although the rate of improvement slows slightly in later years, the overall rise suggests continuous improvement in public health, medical access, and living conditions across most regions.
+
+
+### 2. How Does Health Expenditure Influence Life Expectancy?
 
 * **Visualization:** Scatterplot with regression line.
 ```{r}
@@ -170,16 +173,18 @@ clean_data |>
   geom_point(alpha = 0.4, color = "lightblue2") +
   geom_smooth(method = "lm", se = FALSE, linewidth = 1.2, color = "lightblue3") +
   labs(
-    title = "Health Expentiture vs. Life Expectancy",
-    x = "Health Expentiture (% of GDP)",
+    title = "Health Expenditure vs. Life Expectancy",
+    x = "Health Expenditure (% of GDP)",
     y = "Life Expectancy (Years)"
   ) +
   theme_minimal()
 
 ```
-* **Insight:** 
 
-### 3. Relationship Between Education Expenditure and Life Expectancy
+* **Insight:** Countries with higher health expenditure tend to have higher life expectancy. The positive regression line implies that wealthier nations generally provide better healthcare, nutrition, and infrastructure. However, the scatter plot includes numerous outliers so we cannot say for sure that there is a direct correlation without considering other factors.
+
+
+### 3. How Does Education Expenditure Influence Life Expectancy?
 
 * **Visualization:** Scatterplot with regression line.
 ```{r}
@@ -195,42 +200,56 @@ clean_data |>
   ) +
   theme_minimal()
 ```
-* **Insight:** 
 
-### 4. Life Expectancy by Income Group
+* **Insight:** Higher education expenditure is associated with higher life expectancy, but the relationship is typically weaker and more variable than health expenditure. This makes sense because investing in education indirectly supports health by improving health literacy, economic opportunities, and long-term outcomes, but the effect is not as direct as healthcare investments.
+
+
+### 4. How Does Life Expectancy Differ By Income Group?
 
 * **Visualization:** Boxplot grouped by income classification.
 ```{r}
+clean_data$IncomeGroup <- factor(
+  clean_data$IncomeGroup,
+  levels = c("Low income", "Lower middle income", "Upper middle income", "High income")
+)
+
 clean_data |>
-  ggplot(aes(x = IncomeGroup, 
-             y = Life.Expectancy.World.Bank,
-             fill = IncomeGroup)) +
-  geom_boxplot(alpha = 0.8, palete = "") +
+  ggplot(aes(
+    x = IncomeGroup,
+    y = Life.Expectancy.World.Bank,
+    fill = IncomeGroup
+  )) +
+  geom_boxplot(alpha = 0.8) +
   labs(
     title = "Life Expectancy by Income Group",
     x = "Income Group",
     y = "Life Expectancy (Years)"
   ) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Spectral")
+
 ```
-* **Insight:** 
+
+* **Insight:** Life expectancy increases clearly across income groups, with high-income countries showing the highest median values and low-income countries showing the lowest. The separation between groups highlights persistent global health inequalities tied to resources, infrastructure, and access to medical care. Variation within groups suggests that income level is important but not the only factor influencing population health.
+
 
 
 ## Data Limitations
 
 * Dataset focuses on national-level data, not individual-level outcomes
 * Regional differences within countries are not captured
-* Some socio-economic indicators (ex. CO₂ emissions, corruption) were omitted to simplify analysis
+* Some socio-economic indicators (ex. CO2 emissions, corruption) were omitted to simplify analysis
 * Missing data and small variations in reporting may bias results
 
 
 
 ## Conclusion
 
-This analysis highlights that life expectancy trends are strongly associated with health, education, and income group. While these indicators explain much of the variation, other unmeasured factors likely play a role. Policy makers can use these insights to prioritize investments in health and education to improve life expectancy outcomes globally.
+The analysis shows that global life expectancy has steadily improved from 2000 to 2019, but not evenly across countries. Wealthier nations consistently achieve higher life expectancy, and both GDP and education spending show clear positive relationships with population health. When grouped by income level, the differences become even more clear because high-income countries live significantly longer than low-income countries. Overall, the findings suggest that strong economies, well-funded education systems, and broader social investments play key roles in supporting longer, healthier lives.
 
 
 
 *GitHub Repository:* [https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23](https://github.com/SNazari23/INST447_Group_Project/tree/mainSNazari23)
+
 

@@ -1,0 +1,229 @@
+---
+title: "How Do Socio-Economic Factors Influence Global Life Expectancy?"
+author: "An Analytical Report by Summer Nazari, Rachel Park, Adrien Rozario, Sudenur Yavuz, David Zannou"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(broom)
+```
+
+## Introduction
+
+Global life expectancy is widely used as a key indicator of population health and overall quality of life. Despite steady global improvements over the past several decades, substantial disparities persist between countries. These differences are often driven by socio-economic factors such as income level, education investment, and healthcare spending.
+
+**Research Question:**
+
+*How have life expectancy trends evolved globally over the last two decades, and which socio-economic factors are most strongly associated with these trends?*
+
+The purpose of this analysis is to evaluate how selected socio-economic factors are associated with life expectancy across countries between 2000 and 2019. In particular, this report examines whether differences in income classification and national investments in health and education are statistically associated with differences in life expectancy. The results of this analysis are intended to support high-level policy and resource-allocation decisions.
+
+## Dataset
+
+The dataset used in this analysis comes from [Kaggle – "Life Expectancy & Socio-Economic Factors" (World Bank)](https://www.kaggle.com/datasets/mjshri23/life-expectancy-and-socio-economic-world-bank), which contains indicators collected by the World Bank. The dataset includes observations from multiple countries between 2000 and 2019.
+
+**Data Cleaning**
+
+This report uses the cleaned dataset produced in Deliverable 2. Data cleaning steps included standardizing variable names, removing duplicates, converting numeric variables, filtering the years 2000–2019, and handling missing values. The cleaned dataset is loaded below.
+
+* Load dataset
+```{r}
+# Load dataset
+raw_data <- read.csv("life expectancy.csv", header = TRUE)
+
+# Make a copy of the dataset for cleaning
+clean_data <- raw_data
+```
+
+* Standardize column names
+```{r}
+names(clean_data) <- make.names(names(clean_data), unique = TRUE)
+```
+
+* Remove duplicates and empty strings
+```{r}
+clean_data <- clean_data |> distinct()
+
+clean_data <- clean_data |>
+mutate(across(where(is.character), ~na_if(., ""))) |>
+mutate(across(where(is.character), trimws))
+```
+
+* Convert numeric-looking strings to numeric
+```{r}
+clean_data <- clean_data |>
+mutate(across(where(function(x) all(grepl("^[0-9.]+$", x[!is.na(x)]))), as.numeric))
+```
+
+* Filter years 2000–2019
+```{r}
+if ("Year" %in% names(clean_data)) {
+clean_data <- clean_data |> filter(Year >= 2000, Year <= 2019)
+}
+```
+
+* Drop rows with missing `Life.expectancy`
+```{r}
+if ("Life.expectancy" %in% names(clean_data)) {
+clean_data <- clean_data |> drop_na(Life.expectancy)
+}
+```
+
+* Save cleaned dataset as `cleaned_life_expectancy.csv`
+```{r}
+write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
+cat("File saved: cleaned_life_expectancy.csv\n")
+```
+
+**Key Variables**
+
+The analysis focuses on the following key variables:
+
+| Variable                        | Description                                                                                                   |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------|
+| **Life.Expectancy.World.Bank**  | Average life expectancy at birth, reported by the World Bank.                                                 |
+| **Health.Expenditure..**        | Current health expenditure as a percentage of GDP, representing spending on healthcare services and goods.  |
+| **Education.Expenditure..**     | Total government expenditure on education as a percentage of GDP, including current and capital spending.   |
+| **IncomeGroup**                 | World Bank income classification (Low, Lower Middle, Upper Middle, High).                                     |
+
+## Descriptive Statistics
+
+```{r}
+clean_data |>
+  select(Life.Expectancy.World.Bank, Health.Expenditure.., Education.Expenditure..) |>
+  summary()
+```
+
+```{r}
+clean_data |>
+  group_by(Year) |>
+  summarize(mean_life = mean(Life.Expectancy.World.Bank, na.rm = TRUE)) |>
+  ggplot(aes(x = Year, y = mean_life)) +
+  geom_line(linewidth = 1.1) +
+  labs(title = "Average Global Average Life Expectancy (2000–2019)",
+  x = "Year", y = "Life Expectancy (Years)") +
+  theme_minimal()
+```
+
+## Hypotheses
+
+In our exploratory data analysis, we asked:
+
+ **1. How Has Global Life Expectancy Evolved Over Time?**
+ **2. How Does Health Expenditure Influence Life Expectancy?**
+ **3. How Does Education Expenditure Influence Life Expectancy?**
+ **4. How Does Life Expectancy Differ By Income Group?**
+ 
+And we found that strong economies, well-funded education systems, and broader social investments play key roles in supporting longer, healthier lives.
+
+But how strong are the relationships between these variables, and can we quantify it? In order to explore this statistically, we developed the following hypotheses:
+
+**Hypothesis 1: Health Expenditure vs. Life Expectancy**
+
+* **Null Hypothesis (H₀)**: Health expenditure is *not* associated with life expectancy.
+* **Alternative Hypothesis(H₁)**: Higher health expenditure *is* associated with higher life expectancy.
+
+**Hypothesis 2: Education Expenditure vs. Life Expectancy**
+
+* **Null Hypothesis (H₀)**: Education expenditure is *not* associated with life expectancy.
+* **Alternative Hypothesis(H₁)**: Higher education expenditure *is* associated with higher life expectancy.
+
+**Hypothesis 3: Life Expectancy by Income Group**
+
+* **Null Hypothesis (H₀)**: Mean life expectancy is *equal* across all income groups.
+* **Alternative Hypothesis (H₁)**: At least one income group has a *different* mean life expectancy.
+
+## Data Analysis
+
+To analyze the data, we conducted hypothesis tests.
+
+For Hypotheses 1 and 2, simple linear regression models were fitted with life expectancy as the outcome variable and health expenditure or education expenditure as predictors.
+
+For Hypothesis 3, a one-way analysis of variance (ANOVA) was used to compare mean life expectancy across income groups.
+
+All analyses were conducted in R Studio using R's built-in statistical and graphical functions.
+
+## Test Results
+
+**Health Expenditure Regression**
+
+```{r}
+health_model <- lm(Life.Expectancy.World.Bank ~ Health.Expenditure.., data = clean_data)
+  summary(health_model)
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = Health.Expenditure.., y = Life.Expectancy.World.Bank)) +
+  geom_point(alpha = 0.4, color = "lightblue2") +
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue3") +
+  labs(title = "Health Expenditure vs Life Expectancy",
+  x = "Health Expenditure (% GDP)", y = "Life Expectancy") +
+  theme_minimal()
+```
+
+**Education Expenditure Regression**
+
+```{r}
+edu_model <- lm(Life.Expectancy.World.Bank ~ Education.Expenditure.., data = clean_data)
+  summary(edu_model)
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = Education.Expenditure.., y = Life.Expectancy.World.Bank)) +
+  geom_point(alpha = 0.4, color = "cornflowerblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "royalblue4") +
+  labs(title = "Education Expenditure vs Life Expectancy",
+  x = "Education Expenditure (% GDP)", y = "Life Expectancy") +
+  theme_minimal()
+```
+
+**Income Group and Life Expectancy (ANOVA)**
+
+```{r}
+clean_data$IncomeGroup <- factor(
+  clean_data$IncomeGroup,
+  levels = c("Low income", "Lower middle income", "Upper middle income", "High income")
+)
+
+anova_model <- aov(Life.Expectancy.World.Bank ~ IncomeGroup, data = clean_data)
+  summary(anova_model)
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = IncomeGroup, y = Life.Expectancy.World.Bank, fill = IncomeGroup)) +
+  geom_boxplot() +
+  labs(title = "Life Expectancy by Income Group",
+  x = "Income Group", y = "Life Expectancy (Years)") +
+  theme(legend = "none") +
+  scale_fill_brewer(palette = "Spectral") +
+  theme_minimal()
+    
+```
+
+## Insights
+
+**Interpretation of Results**
+
+The ANOVA results indicate statistically significant differences in mean life expectancy across income groups, suggesting that national income classification is strongly associated with population health outcomes.
+
+Regression results show that health expenditure has a statistically significant positive association with life expectancy, indicating that increased healthcare investment is linked to longer average lifespans. Education expenditure also shows a positive relationship with life expectancy, though the association is weaker and more variable.
+
+**Decision-Making Implications**
+
+From a decision-making perspective, these findings suggest that investments in healthcare infrastructure and education systems are critical for improving population health. Policymakers in lower-income countries may achieve meaningful improvements in life expectancy by prioritizing healthcare funding while also supporting long-term education initiatives.
+
+## Data Limitations
+
+* Dataset focuses on national-level data, not individual-level outcomes
+* Regional differences within countries are not captured
+* Some socio-economic indicators were omitted to simplify analysis
+* Missing data and small variations in reporting may bias results
+
+## Conclusion
+
+Overall, this analysis demonstrates that socio-economic factors—particularly income level and health investment—are strongly associated with global life expectancy. These results reinforce the importance of coordinated economic and social policy strategies aimed at improving health outcomes worldwide.

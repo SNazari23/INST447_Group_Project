@@ -90,30 +90,40 @@ The analysis focuses on the following key variables:
 
 ## Descriptive Statistics
 
+In order to understand the spread of the data, we looked at descriptive statistics for the selected columns:
+
 ```{r}
 clean_data |>
-  select(Life.Expectancy.World.Bank, Health.Expenditure.., Education.Expenditure..) |>
+  select(Life.Expectancy.World.Bank, Health.Expenditure.., Education.Expenditure.., IncomeGroup) |>
   summary()
 ```
+The statistics reveal that life expectancy, health expenditure, and education expenditure vary considerably across countries, reflecting global inequalities. Health expenditure shows slightly higher variability relative to the median than education spending. However, missing data is highest for education expenditure, so analyses involving this variable may have reduced sample size.
+
+This is what it looks like visually:
 
 ```{r}
 clean_data |>
   group_by(Year) |>
   summarize(mean_life = mean(Life.Expectancy.World.Bank, na.rm = TRUE)) |>
   ggplot(aes(x = Year, y = mean_life)) +
-  geom_line(linewidth = 1.1) +
+  geom_line(linewidth = 1.1, color = "palegreen3") +
   labs(title = "Average Global Average Life Expectancy (2000–2019)",
   x = "Year", y = "Life Expectancy (Years)") +
   theme_minimal()
 ```
+
+Life expectancy has generally increased worldwide over the last two decades. While most countries show improvements, some countries lag behind, showing that gains are not the same everywhere.
 
 ## Hypotheses
 
 In our exploratory data analysis, we asked:
 
  **1. How Has Global Life Expectancy Evolved Over Time?**
+ 
  **2. How Does Health Expenditure Influence Life Expectancy?**
+ 
  **3. How Does Education Expenditure Influence Life Expectancy?**
+ 
  **4. How Does Life Expectancy Differ By Income Group?**
  
 And we found that strong economies, well-funded education systems, and broader social investments play key roles in supporting longer, healthier lives.
@@ -153,6 +163,13 @@ All analyses were conducted in R Studio using R's built-in statistical and graph
 health_model <- lm(Life.Expectancy.World.Bank ~ Health.Expenditure.., data = clean_data)
   summary(health_model)
 ```
+A simple linear regression was conducted to examine the relationship between national health expenditure and life expectancy. The results indicate that health expenditure is a statistically significant predictor of life expectancy, F(1, 2974) = 354.6, p < .001.
+
+The regression coefficient for health expenditure was positive and statistically significant (β = 1.18, p < .001), indicating that, on average, a one percentage point increase in health expenditure (as a percentage of GDP) is associated with an increase of approximately 1.18 years in life expectancy. The model explained approximately 10.6% of the variance in life expectancy (R² = 0.106).
+
+Based on these results, *the null hypothesis was rejected*. There is strong statistical evidence to support the conclusion that higher health expenditure is associated with higher life expectancy.
+
+This is what it looks like visually: 
 
 ```{r}
 clean_data |>
@@ -164,12 +181,21 @@ clean_data |>
   theme_minimal()
 ```
 
+Countries that spend more on healthcare tend to have higher life expectancy.
+
 **Education Expenditure Regression**
 
 ```{r}
 edu_model <- lm(Life.Expectancy.World.Bank ~ Education.Expenditure.., data = clean_data)
   summary(edu_model)
 ```
+A simple linear regression was also conducted to assess the relationship between education expenditure and life expectancy. The analysis revealed a statistically significant positive association between education expenditure and life expectancy, F(1, 2143) = 96.93, p < .001.
+
+The estimated regression coefficient for education expenditure was positive (β = 1.02, p < .001), suggesting that a one percentage point increase in education expenditure is associated with an increase of approximately 1.02 years in life expectancy. However, the model explained a smaller proportion of the variance (R² = 0.043), meaning that education expenditure alone accounts for about 4.3% of the variation in life expectancy.
+
+As a result, *the null hypothesis was rejected*. While education expenditure is significantly associated with life expectancy, the strength of this relationship is weaker compared to health expenditure.
+
+This is what it looks like visually:
 
 ```{r}
 clean_data |>
@@ -180,6 +206,8 @@ clean_data |>
   x = "Education Expenditure (% GDP)", y = "Life Expectancy") +
   theme_minimal()
 ```
+
+Higher education spending is generally associated with longer life expectancy, but the relationship is weaker and less consistent than with health spending.
 
 **Income Group and Life Expectancy (ANOVA)**
 
@@ -192,6 +220,13 @@ clean_data$IncomeGroup <- factor(
 anova_model <- aov(Life.Expectancy.World.Bank ~ IncomeGroup, data = clean_data)
   summary(anova_model)
 ```
+A one-way analysis of variance (ANOVA) was performed to compare mean life expectancy across World Bank income groups (low income, lower middle income, upper middle income, and high income). The results show a statistically significant difference in mean life expectancy between income groups, F(3, 3114) = 1659, p < .001.
+
+These findings indicate that at least one income group differs significantly from the others in terms of average life expectancy. Examination of group distributions shows a clear increasing trend in life expectancy as income classification rises.
+
+Accordingly, the null hypothesis was rejected. Income group is strongly associated with differences in life expectancy across countries.
+
+This is what it looks like visually:
 
 ```{r}
 clean_data |>
@@ -205,25 +240,38 @@ clean_data |>
     
 ```
 
+Life expectancy clearly increases as income level rises. High-income countries have the highest life expectancy, and low-income countries have the lowest, matching the statistical results.
+
 ## Insights
 
-**Interpretation of Results**
+### Interpretation of Results
 
-The ANOVA results indicate statistically significant differences in mean life expectancy across income groups, suggesting that national income classification is strongly associated with population health outcomes.
+The analysis shows clear relationships between socio-economic conditions and global life expectancy. Life expectancy differs significantly across World Bank income groups, with higher-income countries generally living longer. This reflects differences in healthcare access, living conditions, and social infrastructure.
 
-Regression results show that health expenditure has a statistically significant positive association with life expectancy, indicating that increased healthcare investment is linked to longer average lifespans. Education expenditure also shows a positive relationship with life expectancy, though the association is weaker and more variable.
+Investments in health and education are both positively associated with life expectancy. Health expenditure has the strongest and most consistent relationship, highlighting that better-funded healthcare systems (such as hospitals, medical staff, and preventive care) support longer lifespans. Education expenditure also contributes to higher life expectancy, though the effect is smaller and more variable, suggesting indirect pathways such as improved health literacy and economic opportunities.
 
-**Decision-Making Implications**
+These insights reveal that while national wealth explains broad differences between countries, targeted investments in healthcare and education play a meaningful role in shaping health outcomes within and across income groups.
 
-From a decision-making perspective, these findings suggest that investments in healthcare infrastructure and education systems are critical for improving population health. Policymakers in lower-income countries may achieve meaningful improvements in life expectancy by prioritizing healthcare funding while also supporting long-term education initiatives.
+### Decision-Making Implications
+
+Policymakers can use these findings to prioritize interventions. For lower-income and middle-income countries, increasing health expenditure may yield immediate improvements in life expectancy, particularly through primary care, disease prevention, and maternal and child health services. Education investment supports long-term health improvements by fostering better-informed and economically empowered populations. Coordinated strategies balancing both healthcare and education spending are likely to be most effective in reducing global health disparities.
 
 ## Data Limitations
 
-* Dataset focuses on national-level data, not individual-level outcomes
-* Regional differences within countries are not captured
-* Some socio-economic indicators were omitted to simplify analysis
-* Missing data and small variations in reporting may bias results
+This analysis is subject to several limitations:
+
+First, the dataset is aggregated at the national level and does not capture individual-level health outcomes or inequalities within countries. As a result, regional and demographic variations in life expectancy are not reflected in the analysis.
+
+Second, some potentially relevant socio-economic indicators, such as income inequality, healthcare access metrics, and environmental factors, were excluded to maintain analytical simplicity. 
+
+Additionally, missing data across years and countries reduced the sample size, which may introduce bias and limit generalizability.
+
+Finally, it is important to note that this is merely a statistical observation of relationships, so the identified associations should not be interpreted as absolute direct causes.
 
 ## Conclusion
 
-Overall, this analysis demonstrates that socio-economic factors—particularly income level and health investment—are strongly associated with global life expectancy. These results reinforce the importance of coordinated economic and social policy strategies aimed at improving health outcomes worldwide.
+Overall, this analysis confirms that socio-economic factors strongly influence global life expectancy. Higher-income countries tend to have longer lifespans, and targeted investments in health and education further enhance population health. As a result, policymakers aiming to improve life expectancy should prioritize healthcare funding while maintaining long-term investments in education. Together, national wealth and strategic socio-economic investments play crucial roles in promoting longer, healthier lives worldwide.
+
+
+
+

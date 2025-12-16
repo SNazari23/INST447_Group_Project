@@ -118,15 +118,13 @@ Life expectancy has generally increased worldwide over the last two decades. Whi
 
 In our exploratory data analysis, we asked:
 
- **1. How Has Global Life Expectancy Evolved Over Time?**
+ * How Has Global Life Expectancy Evolved Over Time?
  
- **2. How Does Health Expenditure Influence Life Expectancy?**
+ * How Does Health Expenditure Influence Life Expectancy?
  
- **3. How Does Education Expenditure Influence Life Expectancy?**
+ * How Does Education Expenditure Influence Life Expectancy?
  
- **4. How Does Life Expectancy Differ By Income Group?**
- 
-And we found that strong economies, well-funded education systems, and broader social investments play key roles in supporting longer, healthier lives.
+ * How Does Life Expectancy Differ By Income Group?
 
 But how strong are the relationships between these variables, and can we quantify it? In order to explore this statistically, we developed the following hypotheses:
 
@@ -147,17 +145,15 @@ But how strong are the relationships between these variables, and can we quantif
 
 ## Data Analysis
 
-To analyze the data, we conducted hypothesis tests.
+To evaluate the proposed hypotheses, we selected appropriate statistical methods based on the data types and the research questions.
 
-For Hypotheses 1 and 2, simple linear regression models were fitted with life expectancy as the outcome variable and health expenditure or education expenditure as predictors.
+To examine the relationships between life expectancy and continuous socio-economic indicators, we decidd to apply simple linear regression. Life expectancy served as the outcome variable, while health expenditure and education expenditure were analyzed separately as predictor variables. Linear regression was chosen because it allows us to estimate of both the direction and strength of association between a continuous predictor and a continuous outcome.
 
-For Hypothesis 3, a one-way analysis of variance (ANOVA) was used to compare mean life expectancy across income groups.
-
-All analyses were conducted in R Studio using R's built-in statistical and graphical functions.
+To assess whether average life expectancy differs across economic development levels, a one-way analysis of variance (ANOVA) was conducted using World Bank income groups as the categorical predictor. ANOVA is appropriate when comparing mean outcomes across more than two groups and allows for testing whether at least one group mean differs significantly from the others.
 
 ## Test Results
 
-**Health Expenditure Regression**
+### 1. Health Expenditure Regression
 
 ```{r}
 health_model <- lm(Life.Expectancy.World.Bank ~ Health.Expenditure.., data = clean_data)
@@ -183,7 +179,7 @@ clean_data |>
 
 Countries that spend more on healthcare tend to have higher life expectancy.
 
-**Education Expenditure Regression**
+### 2. Education Expenditure Regression
 
 ```{r}
 edu_model <- lm(Life.Expectancy.World.Bank ~ Education.Expenditure.., data = clean_data)
@@ -209,7 +205,7 @@ clean_data |>
 
 Higher education spending is generally associated with longer life expectancy, but the relationship is weaker and less consistent than with health spending.
 
-**Income Group and Life Expectancy (ANOVA)**
+### 3. Income Group and Life Expectancy (ANOVA)
 
 ```{r}
 clean_data$IncomeGroup <- factor(

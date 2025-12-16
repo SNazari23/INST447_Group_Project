@@ -8,6 +8,8 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(broom)
+library(ggplot2)
+library(patchwork)
 ```
 
 ## Introduction
@@ -26,9 +28,8 @@ The dataset used in this analysis comes from [Kaggle – "Life Expectancy & Soci
 
 **Data Cleaning**
 
-This report uses the cleaned dataset produced in Deliverable 2. Data cleaning steps included standardizing variable names, removing duplicates, converting numeric variables, filtering the years 2000–2019, and handling missing values. The cleaned dataset is loaded below.
+In order to prepare the data for analysis, we executed the following data cleaning steps:
 
-* Load dataset
 ```{r}
 # Load dataset
 raw_data <- read.csv("life expectancy.csv", header = TRUE)
@@ -37,12 +38,12 @@ raw_data <- read.csv("life expectancy.csv", header = TRUE)
 clean_data <- raw_data
 ```
 
-* Standardize column names
+* Standardized column names
 ```{r}
 names(clean_data) <- make.names(names(clean_data), unique = TRUE)
 ```
 
-* Remove duplicates and empty strings
+* Removed duplicates and empty strings
 ```{r}
 clean_data <- clean_data |> distinct()
 
@@ -51,27 +52,27 @@ mutate(across(where(is.character), ~na_if(., ""))) |>
 mutate(across(where(is.character), trimws))
 ```
 
-* Convert numeric-looking strings to numeric
+* Converte numeric-looking strings to numeric
 ```{r}
 clean_data <- clean_data |>
 mutate(across(where(function(x) all(grepl("^[0-9.]+$", x[!is.na(x)]))), as.numeric))
 ```
 
-* Filter years 2000–2019
+* Filtered years 2000–2019
 ```{r}
 if ("Year" %in% names(clean_data)) {
 clean_data <- clean_data |> filter(Year >= 2000, Year <= 2019)
 }
 ```
 
-* Drop rows with missing `Life.expectancy`
+* Dropped rows with missing `Life.expectancy`
 ```{r}
 if ("Life.expectancy" %in% names(clean_data)) {
 clean_data <- clean_data |> drop_na(Life.expectancy)
 }
 ```
 
-* Save cleaned dataset as `cleaned_life_expectancy.csv`
+* Saved cleaned dataset as `cleaned_life_expectancy.csv`
 ```{r}
 write.csv(clean_data, "cleaned_life_expectancy.csv", row.names = FALSE)
 cat("File saved: cleaned_life_expectancy.csv\n")
@@ -97,9 +98,58 @@ clean_data |>
   select(Life.Expectancy.World.Bank, Health.Expenditure.., Education.Expenditure.., IncomeGroup) |>
   summary()
 ```
+This is what it looks like visually: 
+
+```{r}
+# Life Expectancy 
+p1 <- ggplot(clean_data, aes(x = "", y = Life.Expectancy.World.Bank)) +
+geom_boxplot(width = 0.4, fill = "palegreen3", outlier.alpha = 0.4) +
+stat_summary(fun = median,
+geom = "text",
+aes(label = round(..y..,1)),
+vjust = -0.7,
+size = 3,  # smaller text
+color = "black") +
+labs(title = "Life Expectancy",
+x = "",
+y = "Years") +
+theme_minimal()
+
+# Health Expenditure
+p2 <- ggplot(clean_data, aes(x = "", y = Health.Expenditure..)) +
+geom_boxplot(width = 0.4, fill = "lightblue2", outlier.alpha = 0.4) +
+stat_summary(fun = median,
+geom = "text",
+aes(label = round(..y..,1)),
+vjust = -0.7,
+size = 3,
+color = "black") +
+labs(title = "Health Expenditure",
+x = "",
+y = "% GDP") +
+theme_minimal()
+
+# Education Expenditure 
+p3 <- ggplot(clean_data, aes(x = "", y = Education.Expenditure..)) +
+geom_boxplot(width = 0.4, fill = "cornflowerblue", outlier.alpha = 0.4) +
+stat_summary(fun = median,
+geom = "text",
+aes(label = round(..y..,1)),
+vjust = -0.7,
+size = 3,
+color = "black") +
+labs(title = "Education Expenditure",
+x = "",
+y = "% GDP") +
+theme_minimal()
+
+
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
 The statistics reveal that life expectancy, health expenditure, and education expenditure vary considerably across countries, reflecting global inequalities. Health expenditure shows slightly higher variability relative to the median than education spending. However, missing data is highest for education expenditure, so analyses involving this variable may have reduced sample size.
 
-This is what it looks like visually:
+Then, we wanted to understand what the spread of life expectancy looks like over time:
 
 ```{r}
 clean_data |>
@@ -116,9 +166,7 @@ Life expectancy has generally increased worldwide over the last two decades. Whi
 
 ## Hypotheses
 
-In our exploratory data analysis, we asked:
-
- * How Has Global Life Expectancy Evolved Over Time?
+Based on the observed trends in the descriptive statistics, we formulated some research questions to assess how socio-economic variables contributed to the increase in life expectancy:
  
  * How Does Health Expenditure Influence Life Expectancy?
  
@@ -126,7 +174,7 @@ In our exploratory data analysis, we asked:
  
  * How Does Life Expectancy Differ By Income Group?
 
-But how strong are the relationships between these variables, and can we quantify it? In order to explore this statistically, we developed the following hypotheses:
+We wanted to dive deeper and explore how strong are the relationships between these variables. Hence, we developed the following hypotheses:
 
 **Hypothesis 1: Health Expenditure vs. Life Expectancy**
 

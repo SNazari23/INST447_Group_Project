@@ -143,7 +143,7 @@ But how strong are the relationships between these variables, and can we quantif
 * **Null Hypothesis (H₀)**: Mean life expectancy is *equal* across all income groups.
 * **Alternative Hypothesis (H₁)**: At least one income group has a *different* mean life expectancy.
 
-## Data Analysis
+## Statistical Analysis
 
 To evaluate the proposed hypotheses, we selected appropriate statistical methods based on the data types and the research questions.
 
@@ -230,10 +230,8 @@ clean_data |>
   geom_boxplot() +
   labs(title = "Life Expectancy by Income Group",
   x = "Income Group", y = "Life Expectancy (Years)") +
-  theme(legend = "none") +
-  scale_fill_brewer(palette = "Spectral") +
+  scale_fill_brewer(palette = "Spectral", guide = "none") +
   theme_minimal()
-    
 ```
 
 Life expectancy clearly increases as income level rises. High-income countries have the highest life expectancy, and low-income countries have the lowest, matching the statistical results.

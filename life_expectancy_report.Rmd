@@ -1,6 +1,6 @@
 ---
 title: "How Do Socio-Economic Factors Influence Global Life Expectancy?"
-author: "An Analytical Report by Summer Nazari, Rachel Park, Adrien Rozario, Sudenur Yavuz, David Zannou"
+author: "An Analytical Report by Summer Nazari, Adrien Rozario, Sudenur Yavuz, David Zannou"
 output: html_document
 ---
 
@@ -288,9 +288,11 @@ Life expectancy clearly increases as income level rises. High-income countries h
 
 ### Interpretation of Results
 
-The analysis shows clear relationships between socio-economic conditions and global life expectancy. Life expectancy differs significantly across World Bank income groups, with higher-income countries generally living longer. This reflects differences in healthcare access, living conditions, and social infrastructure.
+The analysis shows clear positive relationships between socio-economic conditions and global life expectancy. 
 
-Investments in health and education are both positively associated with life expectancy. Health expenditure has the strongest and most consistent relationship, highlighting that better-funded healthcare systems (such as hospitals, medical staff, and preventive care) support longer lifespans. Education expenditure also contributes to higher life expectancy, though the effect is smaller and more variable, suggesting indirect pathways such as improved health literacy and economic opportunities.
+Health expenditure has the strongest and most consistent relationship, highlighting that better-funded healthcare systems (such as hospitals, medical staff, and preventive care) support longer lifespans. Education expenditure also contributes to higher life expectancy, though the effect is smaller and more variable, suggesting indirect pathways such as improved health literacy and economic opportunities.
+
+Life expectancy differs significantly across World Bank income groups, with higher-income countries generally living longer. This reflects differences in healthcare access, living conditions, and social infrastructure.
 
 These insights reveal that while national wealth explains broad differences between countries, targeted investments in healthcare and education play a meaningful role in shaping health outcomes within and across income groups.
 
